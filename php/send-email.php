@@ -1,48 +1,53 @@
 <?php
-
 // Replace this with your own email address
 $to = 'the.lonely.knight.h@gmail.com';
 
-function url(){
-  return sprintf(
-    "%s://%s",
-    isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http',
-    $_SERVER['SERVER_NAME']
-  );
+function url() {
+    return sprintf(
+        "%s://%s",
+        isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http',
+        $_SERVER['SERVER_NAME']
+    );
 }
 
-if($_POST) {
+if ($_POST) {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $subject = trim($_POST['subject']);
+    $contact_message = trim($_POST['message']);
 
-   $name = trim(stripslashes($_POST['name']));
-   $email = trim(stripslashes($_POST['email']));
-   $subject = trim(stripslashes($_POST['subject']));
-   $contact_message = trim(stripslashes($_POST['message']));
+    // Basic validation
+    if (empty($name) || empty($email) || empty($contact_message)) {
+        echo "All fields are required.";
+        exit;
+    }
 
-   
-	if ($subject == '') { $subject = "Contact Form Submission"; }
+    if ($subject == '') { 
+        $subject = "Contact Form Submission"; 
+    }
 
-   // Set Message
-   $message .= "Email from: " . $name . "<br />";
-	 $message .= "Email address: " . $email . "<br />";
-   $message .= "Message: <br />";
-   $message .= nl2br($contact_message);
-   $message .= "<br /> ----- <br /> This email was sent from your site " . url() . " contact form. <br />";
+    // Initialize message
+    $message = '';
+    $message .= "Email from: " . $name . "<br />";
+    $message .= "Email address: " . $email . "<br />";
+    $message .= "Message: <br />";
+    $message .= nl2br($contact_message);
+    $message .= "<br /> ----- <br /> This email was sent from your site " . url() . " contact form. <br />";
 
-   // Set From: header
-   $from =  $name . " <" . $email . ">";
+    // Set headers
+    $headers = "From: " . $name . " <" . $email . ">" . "\r\n";
+    $headers .= "Reply-To: " . $email . "\r\n";
+    $headers .= "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+    $headers .= "X-Mailer: PHP/" . phpversion();
 
-   // Email Headers
-	$headers = "From: " . $from . "\r\n";
-	$headers .= "Reply-To: ". $email . "\r\n";
- 	$headers .= "MIME-Version: 1.0\r\n";
-	$headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+    // Send email
+    $mail = mail($to, $subject, $message, $headers);
 
-   ini_set("sendmail_from", $to); // for windows server
-   $mail = mail($to, $subject, $message, $headers);
-
-	if ($mail) { echo "OK"; }
-   else { echo "Something went wrong. Please try again."; }
-
+    if ($mail) { 
+        echo "OK"; 
+    } else { 
+        echo "Something went wrong. Please try again."; 
+    }
 }
-
 ?>
